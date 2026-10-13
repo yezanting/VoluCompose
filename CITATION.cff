@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "Please cite this repository and the MedPruner++ manuscript when using this code."
+type: software
+title: "MedPruner++"
+authors:
+  - family-names: Ye
+    given-names: Zanting
+  - family-names: Lin
+    given-names: Yunrui
+  - family-names: Liu
+    given-names: Shengyuan
+  - family-names: Hao
+    given-names: Jing
+  - family-names: Yuan
+    given-names: Yixuan
+  - family-names: Zheng
+    given-names: Yefeng
+  - family-names: Lu
+    given-names: Lijun
+repository-code: "https://github.com/yezanting/MedPruner-plus-plus"
+url: "https://github.com/yezanting/MedPruner-plus-plus"
+license: MIT
+preferred-citation:
+  type: unpublished
+  title: "MedPruner++: Constructing Compact Volumetric Visual Representations for Medical Image Understanding"
+  authors:
+    - family-names: Ye
+      given-names: Zanting
+    - family-names: Lin
+      given-names: Yunrui
+    - family-names: Liu
+      given-names: Shengyuan
+    - family-names: Hao
+      given-names: Jing
+    - family-names: Yuan
+      given-names: Yixuan
+    - family-names: Zheng
+      given-names: Yefeng
+    - family-names: Lu
+      given-names: Lijun
+  year: 2026
+  notes: "Author-provided research manuscript; code release."
+  url: "https://github.com/yezanting/MedPruner-plus-plus"

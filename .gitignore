@@ -1,0 +1,31 @@
+# Python and build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+env/
+.DS_Store
+
+# Local datasets, model weights, outputs, credentials and editor state
+/data/
+/workspace/
+/tmp/
+/lib/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.vscode/
+eval_results/
+
+# Bundled historical benchmark answers/results (not release source)
+MedUniEval/models/HealthGPT/llava/eval/table/answer/
+MedUniEval/models/HealthGPT/llava/eval/table/results/
+
+# Unrelated bundled MMLU-Pro test annotations
+/MedUniEval/mmlu_pro_test.json

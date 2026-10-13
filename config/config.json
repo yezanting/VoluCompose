@@ -1,0 +1,27 @@
+{
+  "medpruner++": {
+    "frame_uniqueness":0.005,
+    "retain_ratio": 0.1,
+    "spatial_uniqueness" :0.2,
+    "auto_compress" : false
+  },
+  "holitom": {
+    "retain_ratio": 0.1,
+    "tau": 0.80,
+    "beta": 0.6,
+    "holitom_d": 0,
+    "holitom_k": 7,
+    "max_window_size": 1024,
+    "no_beta": false
+  },
+  "unicomp": {
+    "frame_uniqueness":0.005,
+    "retain_ratio": 0.1,
+    "spatial_uniqueness" :0.2,
+    "auto_compress" : false
+  },
+  "visionzip": {
+    "contextual_ratio":0.05,
+    "retain_ratio": 0.1
+  }
+}

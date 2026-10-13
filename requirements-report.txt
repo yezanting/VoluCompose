@@ -1,0 +1,4 @@
+# Additional dependencies for AMOS report scoring.
+-r requirements.txt
+bert-score
+RaTEScore
