@@ -6,17 +6,17 @@
 
 MedPruner++ 是面向体积医学视觉语言模型的**无需训练的视觉 token 压缩框架**。输入是 CT/MRI 切片序列经过视觉编码器得到的有序特征，输出是送入语言模型的更短、有序视觉序列。骨干参数保持冻结，不训练额外的剪枝策略。
 
-例如，一次检查由 32 张切片表示，每张切片产生 256 个视觉 token，共有 8,192 个。设置 `retain_ratio=0.1` 后，请求的总容量为 `floor(8192 × 0.1) = 819` 个 token。由于支持单元容量限制和整数分配，实际保留数可能更少。这里控制的是视觉 token 预算，不是切片保留比例，也不代表运行速度必然提高某个固定倍数。
-
 <p align="center">
-  <img src="assets/method_overview.png" width="100%" alt="MedPruner++ 方法：有序支持单元构建、径向角向 token 选择、局部细化，以及固定或注意力校准的容量设置">
+  <img src="assets/main_architecture.png" width="100%" alt="MedPruner++ 方法：有序支持单元构建、径向角向 token 选择、局部细化，以及固定或注意力校准的容量设置">
 </p>
+
+[论文原始框架图（PDF）](assets/main_architecture.pdf)
 
 内容路径先将重复的连续相邻切片聚合为有序支持单元，再分配单元容量，通过径向—角向特征关系选择具有独特性的锚点，并利用相关局部特征细化锚点。独立的容量路径支持固定预算或基于注意力熵的预算校准。压缩发生在原生视觉编码之后、保留的视觉序列进入语言解码之前。
 
 ## 支持的骨干和任务
 
-下表列出发布代码提供的 Transformers 适配器。适配器存在不等同于已在你的硬件上复现完整基准。
+下表列出 Transformers 适配器支持的骨干和压缩方法组合。
 
 | 骨干 | `MODEL_NAME` 注册名 | MedPruner++ | 包含的对比实现 |
 | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ python -m pip install -e ./medcompose
 python -m nltk.downloader wordnet omw-1.4
 ```
 
-`transformers==4.57.3` 对应本仓库 Qwen3-VL 模块及内置模型使用的装饰器 API。原始依赖列表保留在 `requirements-legacy.txt` 中，供追溯环境使用；其中固定的旧版 Transformers 不适合作为这次发布的安装方案。包构建与导入检查范围见[评估说明](docs/EVALUATION.md)。
+`transformers==4.57.3` 对应本仓库 Qwen3-VL 模块及内置模型使用的装饰器 API。原始依赖列表保留在 `requirements-legacy.txt` 中，供追溯环境使用；其中固定的旧版 Transformers 不适合作为这次发布的安装方案。
 
 ## 数据和模型准备
 
@@ -94,9 +94,9 @@ data/Eval/
 | `spatial_uniqueness` | `0.2` | 局部细化的邻域阈值：`1 - S < threshold` 时该 patch 属于锚点邻域，其中 `S` 是逐行归一化的负 Lorentz 距离。该参数不决定 TopK 锚点数量。 |
 | `auto_compress` | `false` | 开启后根据可用视觉注意力计算 `rho = clamp(mean(H_normalized)^3 / 2, 0, 0.3)`，替代固定预算。 |
 
-固定预算使用大于 0、不超过 1 的保留率。自动容量随输入变化，上限是 30%，不等同于自动设置 10%。极小预算及退化特征或注意力输入需要单独验证。
+固定预算使用大于 0、不超过 1 的保留率。自动容量根据输入注意力计算，替代 `retain_ratio` 设置的固定预算。
 
-模型属性 `compression_rate` 和结果字段 `compose_rates.compose_rate` 的含义均为**保留的视觉 token 数 / 原始视觉 token 数**。因此 `0.1` 表示保留 10%、约移除 90%。应检查实际保留率，不要假设它与请求预算完全相等。
+模型属性 `compression_rate` 和结果字段 `compose_rates.compose_rate` 的含义均为**保留的视觉 token 数 / 原始视觉 token 数**。支持单元容量限制和整数分配可能使实际保留数量小于请求预算。
 
 ## 评估
 
@@ -143,9 +143,31 @@ bash MedUniEval/eval_M3D_chunked.sh
 | `USE_VLLM`、`USE_LLM_JUDGE` | `False`、`False` | 同左 |
 | `CHUNKS` | 单次运行 | `8`，顺序分片 |
 
-本次压缩发布使用 Transformers 适配器。`MAX_IMAGE_NUM` 控制 M3D 的采样上限；继承的 3D-RAD 加载器使用 `max_frames=1800`，AMOS 则读取提供的裁剪切片序列。具体协议及与 Hulu-Med 的差异见 [docs/EVALUATION.md](docs/EVALUATION.md)。
+本次压缩发布使用 Transformers 适配器。`MAX_IMAGE_NUM` 控制 M3D 的采样上限；继承的 3D-RAD 加载器使用 `max_frames=1800`，AMOS 则读取提供的裁剪切片序列。数据加载和评估逻辑见 [docs/EVALUATION.md](docs/EVALUATION.md)。
 
 M3D 和 3D-RAD 在各自输出目录保存 `results.json`、`metrics.json` 和 `wrong_answers.json`。AMOS 保存生成报告及 CSV；第一阶段的 `metrics.json` 只是提示后续运行[报告指标脚本](MedUniEval/utils/Metrics_Compute/cal_report_metrics.py)，并非最终报告分数。
+
+## 代码结构与测试
+
+| 路径 | 作用 |
+| --- | --- |
+| `medcompose/medpruner_pp/` | 压缩逻辑及不同模型的视觉 token 适配器。 |
+| `medcompose/medpruner_pp/utils.py` | 有序支持单元构建、容量分配、锚点选择与局部细化。 |
+| `config/config.json` | 各压缩方法的参数配置。 |
+| `MedUniEval/eval.py` | 解析评估参数、加载模型并调用数据集入口。 |
+| `MedUniEval/models/` | 连接图像处理、生成调用和保留率记录的模型包装器。 |
+| `MedUniEval/utils/` | 数据加载、提示词构造、分片合并和指标计算。 |
+| `demo/` | 各骨干的推理示例，运行前需设置模型和图像路径。 |
+| `tests/` | 压缩逻辑、启动脚本、模块导入和安装包测试。 |
+
+从仓库根目录运行本地测试：
+
+```bash
+python -m pip install build wheel
+python -m unittest discover -s tests -v
+```
+
+本地测试使用合成特征及模拟生成调用检查压缩和启动脚本逻辑，不下载模型权重。数学逻辑测试需要 PyTorch 和 Geoopt，安装包测试需要 `build`。真实数据集评估则在准备模型和切片数据后，按上文命令运行。
 
 ## 引用和致谢
 

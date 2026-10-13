@@ -6,17 +6,17 @@
 
 MedPruner++ is a **training-free visual-token compression framework** for volumetric medical vision–language models. It takes the ordered visual features of a CT/MRI slice sequence and produces a shorter, ordered visual sequence for the language model. All backbone parameters remain frozen; no pruning policy is trained.
 
-For example, a study represented by 32 slices with 256 visual tokens per slice has 8,192 visual tokens. With `retain_ratio=0.1`, the requested capacity is `floor(8192 × 0.1) = 819` tokens. The realized count can be smaller because support-unit capacities and integer allocation constrain the output. This is a visual-token budget, not a fraction of slices or a guaranteed runtime speedup.
-
 <p align="center">
-  <img src="assets/method_overview.png" width="100%" alt="MedPruner++: ordered support construction, radial–angular token selection and local refinement, with fixed or attention-calibrated capacity">
+  <img src="assets/main_architecture.png" width="100%" alt="MedPruner++: ordered support construction, radial–angular token selection and local refinement, with fixed or attention-calibrated capacity">
 </p>
+
+[Original framework figure (PDF)](assets/main_architecture.pdf)
 
 The content path groups recurrent contiguous slices into ordered support units, allocates capacity to those units, selects distinctive anchors through radial–angular feature relations, and refines anchors with related local features. A separate capacity path supports either a fixed budget or an attention-entropy-calibrated budget. Compression is applied after native visual encoding and before the retained visual sequence enters language decoding.
 
 ## Supported backbones and tasks
 
-The released Transformers adapters expose the following combinations. Adapter availability does not substitute for reproducing a full benchmark on your hardware.
+The Transformers adapters support the following backbone and compression-method combinations.
 
 | Backbone | `MODEL_NAME` | MedPruner++ | Included comparison adapters |
 | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ python -m pip install -e ./medcompose
 python -m nltk.downloader wordnet omw-1.4
 ```
 
-`transformers==4.57.3` matches the Qwen3-VL modules and decorator APIs used by the vendored model backends. The original environment list is retained as `requirements-legacy.txt` for provenance; it pins an older Transformers version and is not the release installation recipe. Baseline import and package checks are described in [the evaluation notes](docs/EVALUATION.md).
+`transformers==4.57.3` matches the Qwen3-VL modules and decorator APIs used by the vendored model backends. The original environment list is retained as `requirements-legacy.txt` for provenance; it pins an older Transformers version and is not the release installation recipe.
 
 ## Data and model preparation
 
@@ -94,9 +94,9 @@ This is the MedPruner++ section of [`config/config.json`](config/config.json), w
 | `spatial_uniqueness` | `0.2` | Local refinement threshold: a patch is an anchor's neighbor when `1 - S < threshold`, where `S` is row-normalized negative Lorentz distance. It does not set the TopK anchor count. |
 | `auto_compress` | `false` | If true, replace the fixed budget with `rho = clamp(mean(H_normalized)^3 / 2, 0, 0.3)` from the available visual attention. |
 
-Use a positive retention ratio at most 1 for fixed-budget runs. Automatic capacity is input-dependent and capped at 30%; it is not an automatic 10% setting. Very small budgets and degenerate feature/attention inputs require separate validation.
+Use a positive retention ratio at most 1 for fixed-budget runs. Automatic capacity is computed from the input attention instead of using `retain_ratio`.
 
-The model attribute `compression_rate` and output field `compose_rates.compose_rate` both mean **retained visual tokens / original visual tokens**. Thus `0.1` means 10% retained, or approximately 90% removed. Inspect realized retention rather than assuming it exactly equals the requested capacity.
+The model attribute `compression_rate` and output field `compose_rates.compose_rate` both mean **retained visual tokens / original visual tokens**. Support-unit capacities and integer allocation can make the realized count smaller than the requested budget.
 
 ## Evaluation
 
@@ -143,9 +143,31 @@ Set `EVAL_DATASETS=3DRad` with `eval.sh` for 3D-RAD. Set `COMPRESSION=none` for 
 | `USE_VLLM`, `USE_LLM_JUDGE` | `False`, `False` | Same |
 | `CHUNKS` | Single run | `8` sequential shards |
 
-The compression release uses Transformers adapters. `MAX_IMAGE_NUM` limits sampling in the M3D loader; the inherited 3D-RAD loader uses `max_frames=1800`, and AMOS loads its supplied crop sequence. See [protocol details and Hulu-Med differences](docs/EVALUATION.md).
+The compression release uses Transformers adapters. `MAX_IMAGE_NUM` limits sampling in the M3D loader; the inherited 3D-RAD loader uses `max_frames=1800`, and AMOS loads its supplied crop sequence. See [data loading and evaluation logic](docs/EVALUATION.md).
 
 M3D and 3D-RAD save `results.json`, `metrics.json`, and `wrong_answers.json` under the dataset output directory. AMOS saves generated reports and CSV exports; its first `metrics.json` is an instruction to run the separate [report metric script](MedUniEval/utils/Metrics_Compute/cal_report_metrics.py), not a final report score.
+
+## Code structure and tests
+
+| Path | Role |
+| --- | --- |
+| `medcompose/medpruner_pp/` | Compression logic and model-specific visual-token adapters. |
+| `medcompose/medpruner_pp/utils.py` | Ordered support construction, capacity allocation, anchor selection and refinement. |
+| `config/config.json` | Compression-method parameters. |
+| `MedUniEval/eval.py` | Evaluation argument parsing, model loading and dataset dispatch. |
+| `MedUniEval/models/` | Backbone wrappers that connect processors, generation and retention metadata. |
+| `MedUniEval/utils/` | Dataset loaders, prompt formatting, shard aggregation and metric calculation. |
+| `demo/` | Backbone-specific inference examples; set the model and image paths before running. |
+| `tests/` | Local tests for compression, launchers, imports and packaging. |
+
+Run the local tests from the repository root:
+
+```bash
+python -m pip install build wheel
+python -m unittest discover -s tests -v
+```
+
+The tests use synthetic features and stub generation to exercise compression and launcher logic without downloading model weights. Mathematical tests require PyTorch and Geoopt; wheel tests require `build`. Dataset evaluation uses the commands above after preparing the model and slice data.
 
 ## Citation and acknowledgements
 
