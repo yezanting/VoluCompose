@@ -1,10 +1,10 @@
-# MedPruner++
+# VoluCompose
 
 **Constructing Compact Volumetric Visual Representations for Medical Image Understanding**
 
 [English](README.md) · [简体中文](README_CN.md) · [Evaluation protocol](docs/EVALUATION.md) · [MIT license](LICENSE)
 
-MedPruner++ is a **training-free visual-token compression framework** for volumetric medical vision–language models. It takes the ordered visual features of a CT/MRI slice sequence and produces a shorter, ordered visual sequence for the language model. All backbone parameters remain frozen; no pruning policy is trained.
+VoluComposeis a **training-free visual-token compression framework** for volumetric medical vision–language models. It takes the ordered visual features of a CT/MRI slice sequence and produces a shorter, ordered visual sequence for the language model. All backbone parameters remain frozen; no pruning policy is trained.
 
 <p align="center">
   <img src="assets/main_architecture.png" width="100%" alt="MedPruner++: ordered support construction, radial–angular token selection and local refinement, with fixed or attention-calibrated capacity">
@@ -18,7 +18,7 @@ The content path groups recurrent contiguous slices into ordered support units, 
 
 The Transformers adapters support the following backbone and compression-method combinations.
 
-| Backbone | `MODEL_NAME` | MedPruner++ | Included comparison adapters |
+| Backbone | `MODEL_NAME` | VoluCompose| Included comparison adapters |
 | --- | --- | --- | --- |
 | Qwen2.5-VL | `Qwen2.5-VL` | ✓ | VisionZip, HoliTom, UniComp |
 | Qwen3-VL | `Qwen3-VL` | ✓ | VisionZip, HoliTom, UniComp |
@@ -85,7 +85,7 @@ Both the method selector and the JSON key are **`medpruner++`**. The Python modu
 }
 ```
 
-This is the MedPruner++ section of [`config/config.json`](config/config.json), which also contains baseline configurations.
+This is the VoluComposesection of [`config/config.json`](config/config.json), which also contains baseline configurations.
 
 | Parameter | Default | Meaning in the implementation |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ MODEL_NAME=Hulumed_qwen2 \
 MODEL_PATH=/path/to/Hulu-Med-7B \
 DATASETS_PATH=/path/to/Eval \
 EVAL_DATASETS=Amos \
-COMPRESSION=medpruner++ \
+COMPRESSION=VoluCompose\
 OUTPUT_PATH=workspace/eval/hulu-amos-medprunerpp \
 bash MedUniEval/eval.sh
 ```
@@ -121,7 +121,7 @@ MODEL_NAME=Qwen3-VL \
 MODEL_PATH=/path/to/Qwen3-VL-8B-Instruct \
 DATASETS_PATH=/path/to/Eval \
 CHUNKS=8 \
-COMPRESSION=medpruner++ \
+COMPRESSION=VoluCompose\
 OUTPUT_PATH=workspace/eval/qwen3-m3d-medprunerpp \
 bash MedUniEval/eval_M3D_chunked.sh
 ```
@@ -174,13 +174,7 @@ The tests use synthetic features and stub generation to exercise compression and
 The manuscript metadata below comes from the author-provided draft. No published venue or DOI is asserted. [`CITATION.cff`](CITATION.cff) also provides a repository citation.
 
 ```bibtex
-@misc{ye2026medprunerpp,
-  title = {MedPruner++: Constructing Compact Volumetric Visual Representations for Medical Image Understanding},
-  author = {Ye, Zanting and Lin, Yunrui and Liu, Shengyuan and Hao, Jing and Yuan, Yixuan and Zheng, Yefeng and Lu, Lijun},
-  year = {2026},
-  note = {Research manuscript; code release},
-  url = {https://github.com/yezanting/MedPruner-plus-plus}
-}
+
 ```
 
 This work builds on [MedPruner](https://github.com/Saint-lsy/MedPruner) and uses an evaluation framework adapted from [Hulu-Med](https://github.com/ZJUI-AI4H/Hulu-Med). We acknowledge [Transformers](https://github.com/huggingface/transformers), [Qwen-VL](https://github.com/QwenLM/Qwen3-VL), [MedGemma](https://github.com/google-health/medgemma), [VisionZip](https://github.com/JIA-Lab-research/VisionZip), [HoliTom](https://github.com/cokeshao/HoliTom), and [UniComp](https://github.com/TimeMarker-LLM/UniComp).
@@ -190,4 +184,4 @@ This work builds on [MedPruner](https://github.com/Saint-lsy/MedPruner) and uses
 
 ## License
 
-MedPruner++ project contributions are released under the [MIT License](LICENSE). Vendored and adapted third-party code retains its original copyright notices and license terms, including Apache 2.0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Dataset and pretrained-weight licenses remain separate.
+VoluComposeproject contributions are released under the [MIT License](LICENSE). Vendored and adapted third-party code retains its original copyright notices and license terms, including Apache 2.0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Dataset and pretrained-weight licenses remain separate.
