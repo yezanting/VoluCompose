@@ -1,6 +1,6 @@
 # Third-party notices
 
-MedPruner++ project contributions are distributed under the root MIT license. This does not replace licenses or copyright notices on vendored code, model weights or datasets.
+VoluCompose project contributions are distributed under the root MIT license. This does not replace licenses or copyright notices on vendored code, model weights or datasets.
 
 ## Hulu-Med and its evaluation framework
 
@@ -27,4 +27,4 @@ The included adaptations are not asserted to be byte-identical to the original i
 
 Pretrained model weights and evaluation datasets are not released by this repository. Obtain and use them under their original licenses and access conditions, including any model-specific terms. Historical bundled benchmark answer/result files and the unrelated MMLU-Pro test annotation are excluded from the public tree.
 
-`assets/method_overview.png` and its editable SVG come from the author-provided MedPruner++ manuscript assets. They are a method illustration, not patient imaging or a newly validated experimental result.
+`assets/method_overview.png` and its editable SVG come from the author-provided VoluCompose manuscript assets. They are a method illustration, not patient imaging or a newly validated experimental result.

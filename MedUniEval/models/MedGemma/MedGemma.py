@@ -11,9 +11,9 @@ def _load_model_kwargs(args):
     config_path = args.config
     with open(config_path, "r", encoding="utf-8") as f:
         config_data = json.load(f)
-    if methed == "medpruner++":
+    if methed == "volucompose":
         print(f"run {methed}")
-        from medcompose.medpruner_pp import Gemma3ForConditionalGeneration
+        from medcompose.volucompose import Gemma3ForConditionalGeneration
         return config_data.get(methed, {}),Gemma3ForConditionalGeneration
     elif methed == "holitom":
         print(f"run {methed}")
@@ -114,7 +114,7 @@ class MedGemma:
         for messages in tqdm(messages_list, desc="Generating Outputs"):
             result = self.generate_output(messages)
             res.append(result)
-            if self.methed == "medpruner++": 
+            if self.methed == "volucompose":
                 compose_rates.append({
                     "compose_rate":self.llm.model.compression_rate.float().cpu().item(),
                     # "selected_len":self.llm.model.selected_len

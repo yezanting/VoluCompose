@@ -47,9 +47,9 @@ def _load_model_kwargs(args):
     config_path = args.config
     with open(config_path, "r", encoding="utf-8") as f:
         config_data = json.load(f)
-    if methed == "medpruner++":
+    if methed == "volucompose":
         print(f"run {methed}")
-        from medcompose.medpruner_pp import HulumedQwen2ForCausalLM
+        from medcompose.volucompose import HulumedQwen2ForCausalLM
         return config_data.get(methed, {}),HulumedQwen2ForCausalLM
     elif methed == "holitom":
         print(f"run {methed}")
@@ -158,7 +158,7 @@ class HuluMed_Qwen2:
         for messages in tqdm(messages_list, desc="Generating Outputs"):
             result = self.generate_output(messages)
             res.append(result)
-            if self.methed == "medpruner++": 
+            if self.methed == "volucompose":
                 compose_rates.append({
                     "compose_rate":self.model.compression_rate.float().cpu().item(),
                     # "selected_len":self.model.selected_len

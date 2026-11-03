@@ -22,9 +22,9 @@ Annotation paths must point to actual image directories. Filenames must sort in 
 
 ## Compression and generation
 
-`COMPRESSION=medpruner++` selects the MedPruner++ adapters; `COMPRESSION=none` selects the uncompressed model. `visionzip`, `holitom` and `unicomp` select the included comparison adapters.
+`COMPRESSION=volucompose` selects the VoluCompose adapters; `COMPRESSION=none` selects the uncompressed model. `visionzip`, `holitom` and `unicomp` select the included comparison adapters.
 
-MedPruner++ first groups contiguous recurrent slices into ordered support units. It distributes the token budget across units, selects distinctive anchors through radial–angular relations, refines them with neighboring features, and preserves source order in the compact sequence. `retain_ratio` sets a budget relative to the original visual-token count. With `auto_compress=true`, normalized attention entropy determines the budget instead. Unit capacities and integer allocation constrain the final sequence length.
+VoluCompose first groups contiguous recurrent slices into ordered support units. It distributes the token budget across units, selects distinctive anchors using Lorentz distance, refines them with neighboring features, and preserves source order in the compact sequence. `retain_ratio` sets a budget relative to the original visual-token count. With `auto_compress=true`, normalized attention entropy determines the budget instead. Unit capacities and integer allocation constrain the final sequence length.
 
 `compression_rate` and `compose_rates.compose_rate` record retained visual tokens divided by original visual tokens. These fields describe retention rather than the removed fraction.
 
@@ -54,8 +54,8 @@ Place the RaTE checkpoints at `workspace/model/RaTE-NER-Deberta` and `workspace/
 ```bash
 cd MedUniEval
 python utils/Metrics_Compute/cal_report_metrics.py \
-  --results_path ../workspace/eval/hulu-amos-medprunerpp/Amos/results.json \
-  --output_metrics_path ../workspace/eval/hulu-amos-medprunerpp/Amos/report_metrics.json
+  --results_path ../workspace/eval/hulu-amos-volucompose/Amos/results.json \
+  --output_metrics_path ../workspace/eval/hulu-amos-volucompose/Amos/report_metrics.json
 ```
 
 The scorer computes BLEU, ROUGE, METEOR and RaTE. It removes report-section prefixes from predictions, truncates predictions for ROUGE, and skips empty predictions. Lexical metrics use the total input count as their denominator; RaTE averages over nonempty predictions. The script does not compute GREEN or BERTScore.

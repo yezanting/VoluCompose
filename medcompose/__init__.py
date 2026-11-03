@@ -1,7 +1,7 @@
 """Public exports, loaded only when the requested backend is used."""
 from importlib import import_module
 
-_EXPORTS = {'visionzip': ('.visionzip', None), 'unicomp': ('.unicomp', None), 'medpruner_pp': ('.medpruner_pp', None), 'holitom': ('.holitom', None)}
+_EXPORTS = {'visionzip': ('.visionzip', None), 'unicomp': ('.unicomp', None), 'volucompose': ('.volucompose', None), 'holitom': ('.holitom', None)}
 
 __all__ = list(_EXPORTS)
 

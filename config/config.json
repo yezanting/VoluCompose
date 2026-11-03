@@ -1,5 +1,5 @@
 {
-  "medpruner++": {
+  "volucompose": {
     "frame_uniqueness":0.005,
     "retain_ratio": 0.1,
     "spatial_uniqueness" :0.2,

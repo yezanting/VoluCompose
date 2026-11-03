@@ -1,7 +1,7 @@
-"""Token pruning utilities for MedPruner++ (training-free visual token
+"""Token pruning utilities for VoluCompose (training-free visual token
 compression for 3D medical image understanding).
 
-Terminology follows the MedPruner++ paper (docs/MedPruner++); code
+Terminology follows the VoluCompose paper; code
 identifiers kept for API stability map to paper terms as follows:
   frame / per-frame        slice s (CT/MRI slice) and per-unit quantities
   frame_group_fusion       ordered support construction (support units I_m)
@@ -66,10 +66,6 @@ def cal_mainfold(metric):
 def cal_rate(attn, eps=1e-12):
   """Attention-calibrated capacity: mean normalized entropy H_bar of attention
   rows, followed by the bounded cubic rule rho_cal = clip_[0, rho_max](H_bar^3 / 2)."""
-  # gemma_attn = tensor(0.5678) -> 0.1
-  # hulu_attn = tensor(0.8537) -> 0.3
-  # qwen3vl_attn = tensor(0.9238) -> 0.3
-  # qwen25vl_attn = tensor(0.9618) -> 0.3
 
   # Normalize attention rows: a_i = alpha_i / sum_j alpha_j
   attn = attn / attn.sum(dim=-1, keepdim=True)
@@ -86,7 +82,7 @@ def cal_rate(attn, eps=1e-12):
 def select_static_windows(feat, batch_size, tau, max_window_size):
   """Legacy dynamic-programming slice-window selection.
 
-  Not part of the MedPruner++ content path; kept for reference.
+  Not part of the VoluCompose content path; kept for reference.
   """
   dtype = feat.dtype
   metric = nn.functional.normalize(feat, p=2, dim=-1)

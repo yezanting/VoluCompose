@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "medcompose"
 version = "0.1.0"
-description = "MedPruner++: training-free volumetric visual token compression"
+description = "VoluCompose: training-free volumetric visual token compression"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE", "LICENSES/*.txt"]
@@ -16,13 +16,13 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/yezanting/MedPruner-plus-plus"
+Repository = "https://github.com/yezanting/VoluCompose"
 
 [tool.setuptools]
 package-dir = {"" = ".."}
 
 [tool.setuptools.packages.find]
 where = [".."]
-include = ["medcompose", "medcompose.medpruner_pp*", "medcompose.visionzip*", "medcompose.holitom*", "medcompose.unicomp*"]
+include = ["medcompose", "medcompose.volucompose*", "medcompose.visionzip*", "medcompose.holitom*", "medcompose.unicomp*"]
 exclude = ["*.build*", "*.__pycache__*"]
 namespaces = true

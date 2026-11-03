@@ -1,24 +1,24 @@
-# MedPruner++
+# VoluCompose
 
 **Constructing Compact Volumetric Visual Representations for Medical Image Understanding**
 
 [English](README.md) · [简体中文](README_CN.md) · [评估协议](docs/EVALUATION.md) · [MIT 许可证](LICENSE)
 
-MedPruner++ 是面向体积医学视觉语言模型的**无需训练的视觉 token 压缩框架**。输入是 CT/MRI 切片序列经过视觉编码器得到的有序特征，输出是送入语言模型的更短、有序视觉序列。骨干参数保持冻结，不训练额外的剪枝策略。
+VoluCompose 是面向体积医学视觉语言模型的**无需训练的视觉 token 压缩框架**。输入是 CT/MRI 切片序列经过视觉编码器得到的有序特征，输出是送入语言模型的更短、有序视觉序列。骨干参数保持冻结，不训练额外的剪枝策略。
 
 <p align="center">
-  <img src="assets/main_architecture.png" width="100%" alt="MedPruner++ 方法：有序支持单元构建、径向角向 token 选择、局部细化，以及固定或注意力校准的容量设置">
+  <img src="assets/main_architecture.png" width="100%" alt="VoluCompose 方法：有序支持单元构建、径向角向 token 选择、局部细化，以及固定或注意力校准的容量设置">
 </p>
 
 [论文原始框架图（PDF）](assets/main_architecture.pdf)
 
-内容路径先将重复的连续相邻切片聚合为有序支持单元，再分配单元容量，通过径向—角向特征关系选择具有独特性的锚点，并利用相关局部特征细化锚点。独立的容量路径支持固定预算或基于注意力熵的预算校准。压缩发生在原生视觉编码之后、保留的视觉序列进入语言解码之前。
+**双曲 token 组合**将连续切片聚合为有序支持单元，在单元间分配容量，用 Lorentz 距离选择有区分度的锚点，再融合局部特征并保留原始顺序。**注意力校准的容量控制**独立确定总预算，可使用固定保留率，或根据视觉注意力的归一化熵计算。压缩发生在原生视觉编码之后、语言解码之前。
 
 ## 支持的骨干和任务
 
 下表列出 Transformers 适配器支持的骨干和压缩方法组合。
 
-| 骨干 | `MODEL_NAME` 注册名 | MedPruner++ | 包含的对比实现 |
+| 骨干 | `MODEL_NAME` 注册名 | VoluCompose | 包含的对比实现 |
 | --- | --- | --- | --- |
 | Qwen2.5-VL | `Qwen2.5-VL` | ✓ | VisionZip、HoliTom、UniComp |
 | Qwen3-VL | `Qwen3-VL` | ✓ | VisionZip、HoliTom、UniComp |
@@ -38,10 +38,10 @@ MedPruner++ 是面向体积医学视觉语言模型的**无需训练的视觉 to
 模型推理使用 Linux 和 NVIDIA GPU，适配器使用 FlashAttention 2。请按服务器选择对应的 PyTorch/CUDA 构建，下面以 CUDA 12.4 为例：
 
 ```bash
-git clone https://github.com/yezanting/MedPruner-plus-plus.git
-cd MedPruner-plus-plus
-conda create -n medprunerpp python=3.10 -y
-conda activate medprunerpp
+git clone https://github.com/yezanting/VoluCompose.git
+cd VoluCompose
+conda create -n volucompose python=3.10 -y
+conda activate volucompose
 
 python -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 python -m pip install packaging ninja
@@ -72,11 +72,11 @@ data/Eval/
 
 ## 压缩配置
 
-方法开关和 JSON 配置键均为 **`medpruner++`**，Python 模块名为 `medcompose.medpruner_pp`。
+方法开关和 JSON 配置键均为 **`volucompose`**，Python 模块名为 `medcompose.volucompose`。
 
 ```json
 {
-  "medpruner++": {
+  "volucompose": {
     "frame_uniqueness": 0.005,
     "retain_ratio": 0.1,
     "spatial_uniqueness": 0.2,
@@ -85,7 +85,7 @@ data/Eval/
 }
 ```
 
-这是 [`config/config.json`](config/config.json) 中的 MedPruner++ 部分；该文件也包含其他对比方法的配置。
+这是 [`config/config.json`](config/config.json) 中的 VoluCompose 部分；该文件也包含其他对比方法的配置。
 
 | 参数 | 默认值 | 代码中的实际含义 |
 | --- | --- | --- |
@@ -108,8 +108,8 @@ MODEL_NAME=Hulumed_qwen2 \
 MODEL_PATH=/path/to/Hulu-Med-7B \
 DATASETS_PATH=/path/to/Eval \
 EVAL_DATASETS=Amos \
-COMPRESSION=medpruner++ \
-OUTPUT_PATH=workspace/eval/hulu-amos-medprunerpp \
+COMPRESSION=volucompose \
+OUTPUT_PATH=workspace/eval/hulu-amos-volucompose \
 bash MedUniEval/eval.sh
 ```
 
@@ -121,8 +121,8 @@ MODEL_NAME=Qwen3-VL \
 MODEL_PATH=/path/to/Qwen3-VL-8B-Instruct \
 DATASETS_PATH=/path/to/Eval \
 CHUNKS=8 \
-COMPRESSION=medpruner++ \
-OUTPUT_PATH=workspace/eval/qwen3-m3d-medprunerpp \
+COMPRESSION=volucompose \
+OUTPUT_PATH=workspace/eval/qwen3-m3d-volucompose \
 bash MedUniEval/eval_M3D_chunked.sh
 ```
 
@@ -135,7 +135,7 @@ bash MedUniEval/eval_M3D_chunked.sh
 | `MODEL_PATH` | `workspace/model/hulu_7B` | 同左 |
 | `DATASETS_PATH` | `data/Eval` | 同左 |
 | `CONFIG_PATH` | `config/config.json` | 同左 |
-| `COMPRESSION` | `medpruner++` | 同左 |
+| `COMPRESSION` | `volucompose` | 同左 |
 | `CUDA_VISIBLE_DEVICES` | `0` | `0` |
 | `MAX_NEW_TOKENS` | `16384` | `256` |
 | `MAX_IMAGE_NUM` | `600` | `600` |
@@ -151,8 +151,8 @@ M3D 和 3D-RAD 在各自输出目录保存 `results.json`、`metrics.json` 和 `
 
 | 路径 | 作用 |
 | --- | --- |
-| `medcompose/medpruner_pp/` | 压缩逻辑及不同模型的视觉 token 适配器。 |
-| `medcompose/medpruner_pp/utils.py` | 有序支持单元构建、容量分配、锚点选择与局部细化。 |
+| `medcompose/volucompose/` | 压缩逻辑及不同模型的视觉 token 适配器。 |
+| `medcompose/volucompose/utils.py` | 有序支持单元构建、容量分配、锚点选择与局部细化。 |
 | `config/config.json` | 各压缩方法的参数配置。 |
 | `MedUniEval/eval.py` | 解析评估参数、加载模型并调用数据集入口。 |
 | `MedUniEval/models/` | 连接图像处理、生成调用和保留率记录的模型包装器。 |
@@ -174,12 +174,12 @@ python -m unittest discover -s tests -v
 以下论文元数据来自作者提供的稿件，不声明已发表期刊或 DOI。[`CITATION.cff`](CITATION.cff) 同时提供仓库引用信息。
 
 ```bibtex
-@misc{ye2026medprunerpp,
-  title = {MedPruner++: Constructing Compact Volumetric Visual Representations for Medical Image Understanding},
-  author = {Ye, Zanting and Lin, Yunrui and Liu, Shengyuan and Hao, Jing and Yuan, Yixuan and Zheng, Yefeng and Lu, Lijun},
+@misc{ye2026volucompose,
+  title = {VoluCompose: Constructing Compact Volumetric Visual Representations for Medical Image Understanding},
+  author = {Ye, Zanting and Lin, Yunrui and Liu, Shengyuan and Hao, Jing and Hu, Chen and Zheng, Yefeng and Lu, Lijun},
   year = {2026},
   note = {Research manuscript; code release},
-  url = {https://github.com/yezanting/MedPruner-plus-plus}
+  url = {https://github.com/yezanting/VoluCompose}
 }
 ```
 
@@ -190,4 +190,4 @@ python -m unittest discover -s tests -v
 
 ## 许可证
 
-MedPruner++ 项目贡献采用 [MIT 许可证](LICENSE)。内置或改编的第三方代码保留原始版权声明和许可条件，包括 Apache 2.0，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。数据集和预训练权重的许可独立适用。
+VoluCompose 项目贡献采用 [MIT 许可证](LICENSE)。内置或改编的第三方代码保留原始版权声明和许可条件，包括 Apache 2.0，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。数据集和预训练权重的许可独立适用。

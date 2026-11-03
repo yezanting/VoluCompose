@@ -1,7 +1,7 @@
 cff-version: 1.2.0
-message: "Please cite this repository and the MedPruner++ manuscript when using this code."
+message: "Please cite this repository and the VoluCompose manuscript when using this code."
 type: software
-title: "MedPruner++"
+title: "VoluCompose"
 authors:
   - family-names: Ye
     given-names: Zanting
@@ -11,18 +11,18 @@ authors:
     given-names: Shengyuan
   - family-names: Hao
     given-names: Jing
-  - family-names: Yuan
-    given-names: Yixuan
+  - family-names: Hu
+    given-names: Chen
   - family-names: Zheng
     given-names: Yefeng
   - family-names: Lu
     given-names: Lijun
-repository-code: "https://github.com/yezanting/MedPruner-plus-plus"
-url: "https://github.com/yezanting/MedPruner-plus-plus"
+repository-code: "https://github.com/yezanting/VoluCompose"
+url: "https://github.com/yezanting/VoluCompose"
 license: MIT
 preferred-citation:
   type: unpublished
-  title: "MedPruner++: Constructing Compact Volumetric Visual Representations for Medical Image Understanding"
+  title: "VoluCompose: Constructing Compact Volumetric Visual Representations for Medical Image Understanding"
   authors:
     - family-names: Ye
       given-names: Zanting
@@ -32,12 +32,12 @@ preferred-citation:
       given-names: Shengyuan
     - family-names: Hao
       given-names: Jing
-    - family-names: Yuan
-      given-names: Yixuan
+    - family-names: Hu
+      given-names: Chen
     - family-names: Zheng
       given-names: Yefeng
     - family-names: Lu
       given-names: Lijun
   year: 2026
   notes: "Author-provided research manuscript; code release."
-  url: "https://github.com/yezanting/MedPruner-plus-plus"
+  url: "https://github.com/yezanting/VoluCompose"

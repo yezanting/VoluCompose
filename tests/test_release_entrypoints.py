@@ -24,7 +24,7 @@ class Scalar:
 
 
 class RetentionMetadataTests(unittest.TestCase):
-    def test_medpruner_reports_measured_retention_on_all_four_backbones(self):
+    def test_volucompose_reports_measured_retention_on_all_four_backbones(self):
         adapters = [
             ("Qwen2_5_VL/Qwen2_5_VL_hf.py", "Qwen2_5_VL", "llm", False),
             ("Qwen3_VL/Qwen3_VL_hf.py", "Qwen3VL", "llm", True),
@@ -41,7 +41,7 @@ class RetentionMetadataTests(unittest.TestCase):
                 namespace = {"tqdm": lambda values, **kwargs: values}
                 exec(compile(ast.Module(body=[cls], type_ignores=[]), str(path), "exec"), namespace)
                 model = namespace[name].__new__(namespace[name])
-                model.methed = "medpruner++"
+                model.methed = "volucompose"
                 model.generate_output = lambda message: "A"
                 backend = SimpleNamespace(compression_rate=Scalar(), selected_len=2)
                 setattr(model, attr, SimpleNamespace(model=backend) if nested else backend)
@@ -55,7 +55,7 @@ class RetentionMetadataTests(unittest.TestCase):
 class PackageImportTests(unittest.TestCase):
     def test_imports_do_not_require_every_model_backend(self):
         code = "import importlib,sys\n"
-        for module in ["medcompose", "medcompose.medpruner_pp", "medcompose.visionzip",
+        for module in ["medcompose", "medcompose.volucompose", "medcompose.visionzip",
                        "medcompose.holitom", "medcompose.unicomp"]:
             code += f"importlib.import_module({module!r})\n"
         code += "assert 'torch' not in sys.modules\nassert 'transformers' not in sys.modules\n"
@@ -86,12 +86,12 @@ class LauncherTests(unittest.TestCase):
 
     def test_single_launcher_honors_overrides_and_pruning_method(self):
         calls = self.record("eval.sh", MODEL_NAME="Qwen3-VL", EVAL_DATASETS="M3D",
-                            COMPRESSION="medpruner++", CUDA_VISIBLE_DEVICES="2")
+                            COMPRESSION="volucompose", CUDA_VISIBLE_DEVICES="2")
         self.assertEqual(len(calls), 1)
         args = calls[0]["args"]
         for key, value in [("--model_name", "Qwen3-VL"), ("--model_path", "/models/example"),
                            ("--datasets_path", "/datasets/example"),
-                           ("--compression", "medpruner++"), ("--eval_datasets", "M3D")]:
+                           ("--compression", "volucompose"), ("--eval_datasets", "M3D")]:
             self.assertEqual(args[args.index(key) + 1], value)
         self.assertEqual(calls[0]["gpu"], "2")
 

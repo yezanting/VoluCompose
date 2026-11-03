@@ -1,4 +1,4 @@
-#  CUDA_VISIBLE_DEVICES=0 python Qwen25VL.py --methed medpruner++
+#  CUDA_VISIBLE_DEVICES=0 python Qwen25VL.py --methed volucompose
 
 import argparse
 import torch
@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
   "--methed",
   default=os.environ.get("METHED", "orignal"),
-  choices=["orignal", "medpruner++"],
+  choices=["orignal", "volucompose"],
   help="Compression methed. Can also be provided by env var METHED.",
 )
 args = parser.parse_args()
@@ -28,9 +28,9 @@ def _load_model_kwargs(methed):
     config_path = "../config/config.json"
     with open(config_path, "r", encoding="utf-8") as f:
         config_data = json.load(f)
-    if methed == "medpruner++":
+    if methed == "volucompose":
         print(f"run {methed}")
-        from medcompose.medpruner_pp import Qwen2_5_VLForConditionalGeneration
+        from medcompose.volucompose import Qwen2_5_VLForConditionalGeneration
         return config_data.get(methed, {}),Qwen2_5_VLForConditionalGeneration
     elif methed == "holitom":
         print(f"run {methed}")

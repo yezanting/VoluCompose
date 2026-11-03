@@ -4,21 +4,21 @@
 
 [English](README.md) · [简体中文](README_CN.md) · [Evaluation protocol](docs/EVALUATION.md) · [MIT license](LICENSE)
 
-VoluComposeis a **training-free visual-token compression framework** for volumetric medical vision–language models. It takes the ordered visual features of a CT/MRI slice sequence and produces a shorter, ordered visual sequence for the language model. All backbone parameters remain frozen; no pruning policy is trained.
+VoluCompose is a **training-free visual-token compression framework** for volumetric medical vision–language models. It takes the ordered visual features of a CT/MRI slice sequence and produces a shorter, ordered visual sequence for the language model. All backbone parameters remain frozen; no pruning policy is trained.
 
 <p align="center">
-  <img src="assets/main_architecture.png" width="100%" alt="MedPruner++: ordered support construction, radial–angular token selection and local refinement, with fixed or attention-calibrated capacity">
+  <img src="assets/main_architecture.png" width="100%" alt="VoluCompose: ordered support construction, radial–angular token selection and local refinement, with fixed or attention-calibrated capacity">
 </p>
 
 [Original framework figure (PDF)](assets/main_architecture.pdf)
 
-The content path groups recurrent contiguous slices into ordered support units, allocates capacity to those units, selects distinctive anchors through radial–angular feature relations, and refines anchors with related local features. A separate capacity path supports either a fixed budget or an attention-entropy-calibrated budget. Compression is applied after native visual encoding and before the retained visual sequence enters language decoding.
+**Hyperbolic token composition** groups contiguous slices into ordered support units, allocates capacity across units, selects distinctive anchors using Lorentz distance, and refines them with local features while preserving source order. **Attention-calibrated capacity control** sets the budget independently, using either a fixed retention fraction or normalized visual-attention entropy. The compact sequence enters the language decoder after native visual encoding.
 
 ## Supported backbones and tasks
 
 The Transformers adapters support the following backbone and compression-method combinations.
 
-| Backbone | `MODEL_NAME` | VoluCompose| Included comparison adapters |
+| Backbone | `MODEL_NAME` | VoluCompose | Included comparison adapters |
 | --- | --- | --- | --- |
 | Qwen2.5-VL | `Qwen2.5-VL` | ✓ | VisionZip, HoliTom, UniComp |
 | Qwen3-VL | `Qwen3-VL` | ✓ | VisionZip, HoliTom, UniComp |
@@ -38,10 +38,10 @@ The evaluation inputs are **preprocessed slice-image directories** referenced by
 Use Linux with an NVIDIA GPU for model inference. The supplied adapters use FlashAttention 2. Choose the PyTorch/CUDA build appropriate to your server; the following is a CUDA 12.4 example:
 
 ```bash
-git clone https://github.com/yezanting/MedPruner-plus-plus.git
-cd MedPruner-plus-plus
-conda create -n medprunerpp python=3.10 -y
-conda activate medprunerpp
+git clone https://github.com/yezanting/VoluCompose.git
+cd VoluCompose
+conda create -n volucompose python=3.10 -y
+conda activate volucompose
 
 python -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 python -m pip install packaging ninja
@@ -72,11 +72,11 @@ Each annotation's `video[0]` must point to an existing directory containing the 
 
 ## Compression configuration
 
-Both the method selector and the JSON key are **`medpruner++`**. The Python module is `medcompose.medpruner_pp`.
+Both the method selector and the JSON key are **`volucompose`**. The Python module is `medcompose.volucompose`.
 
 ```json
 {
-  "medpruner++": {
+  "volucompose": {
     "frame_uniqueness": 0.005,
     "retain_ratio": 0.1,
     "spatial_uniqueness": 0.2,
@@ -85,7 +85,7 @@ Both the method selector and the JSON key are **`medpruner++`**. The Python modu
 }
 ```
 
-This is the VoluComposesection of [`config/config.json`](config/config.json), which also contains baseline configurations.
+This is the VoluCompose section of [`config/config.json`](config/config.json), which also contains baseline configurations.
 
 | Parameter | Default | Meaning in the implementation |
 | --- | --- | --- |
@@ -108,8 +108,8 @@ MODEL_NAME=Hulumed_qwen2 \
 MODEL_PATH=/path/to/Hulu-Med-7B \
 DATASETS_PATH=/path/to/Eval \
 EVAL_DATASETS=Amos \
-COMPRESSION=VoluCompose\
-OUTPUT_PATH=workspace/eval/hulu-amos-medprunerpp \
+COMPRESSION=volucompose \
+OUTPUT_PATH=workspace/eval/hulu-amos-volucompose \
 bash MedUniEval/eval.sh
 ```
 
@@ -121,8 +121,8 @@ MODEL_NAME=Qwen3-VL \
 MODEL_PATH=/path/to/Qwen3-VL-8B-Instruct \
 DATASETS_PATH=/path/to/Eval \
 CHUNKS=8 \
-COMPRESSION=VoluCompose\
-OUTPUT_PATH=workspace/eval/qwen3-m3d-medprunerpp \
+COMPRESSION=volucompose \
+OUTPUT_PATH=workspace/eval/qwen3-m3d-volucompose \
 bash MedUniEval/eval_M3D_chunked.sh
 ```
 
@@ -135,7 +135,7 @@ Set `EVAL_DATASETS=3DRad` with `eval.sh` for 3D-RAD. Set `COMPRESSION=none` for 
 | `MODEL_PATH` | `workspace/model/hulu_7B` | Same |
 | `DATASETS_PATH` | `data/Eval` | Same |
 | `CONFIG_PATH` | `config/config.json` | Same |
-| `COMPRESSION` | `medpruner++` | Same |
+| `COMPRESSION` | `volucompose` | Same |
 | `CUDA_VISIBLE_DEVICES` | `0` | `0` |
 | `MAX_NEW_TOKENS` | `16384` | `256` |
 | `MAX_IMAGE_NUM` | `600` | `600` |
@@ -151,8 +151,8 @@ M3D and 3D-RAD save `results.json`, `metrics.json`, and `wrong_answers.json` und
 
 | Path | Role |
 | --- | --- |
-| `medcompose/medpruner_pp/` | Compression logic and model-specific visual-token adapters. |
-| `medcompose/medpruner_pp/utils.py` | Ordered support construction, capacity allocation, anchor selection and refinement. |
+| `medcompose/volucompose/` | Compression logic and model-specific visual-token adapters. |
+| `medcompose/volucompose/utils.py` | Ordered support construction, capacity allocation, anchor selection and refinement. |
 | `config/config.json` | Compression-method parameters. |
 | `MedUniEval/eval.py` | Evaluation argument parsing, model loading and dataset dispatch. |
 | `MedUniEval/models/` | Backbone wrappers that connect processors, generation and retention metadata. |
@@ -174,7 +174,13 @@ The tests use synthetic features and stub generation to exercise compression and
 The manuscript metadata below comes from the author-provided draft. No published venue or DOI is asserted. [`CITATION.cff`](CITATION.cff) also provides a repository citation.
 
 ```bibtex
-
+@misc{ye2026volucompose,
+  title = {VoluCompose: Constructing Compact Volumetric Visual Representations for Medical Image Understanding},
+  author = {Ye, Zanting and Lin, Yunrui and Liu, Shengyuan and Hao, Jing and Hu, Chen and Zheng, Yefeng and Lu, Lijun},
+  year = {2026},
+  note = {Research manuscript; code release},
+  url = {https://github.com/yezanting/VoluCompose}
+}
 ```
 
 This work builds on [MedPruner](https://github.com/Saint-lsy/MedPruner) and uses an evaluation framework adapted from [Hulu-Med](https://github.com/ZJUI-AI4H/Hulu-Med). We acknowledge [Transformers](https://github.com/huggingface/transformers), [Qwen-VL](https://github.com/QwenLM/Qwen3-VL), [MedGemma](https://github.com/google-health/medgemma), [VisionZip](https://github.com/JIA-Lab-research/VisionZip), [HoliTom](https://github.com/cokeshao/HoliTom), and [UniComp](https://github.com/TimeMarker-LLM/UniComp).
@@ -184,4 +190,4 @@ This work builds on [MedPruner](https://github.com/Saint-lsy/MedPruner) and uses
 
 ## License
 
-VoluComposeproject contributions are released under the [MIT License](LICENSE). Vendored and adapted third-party code retains its original copyright notices and license terms, including Apache 2.0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Dataset and pretrained-weight licenses remain separate.
+VoluCompose project contributions are released under the [MIT License](LICENSE). Vendored and adapted third-party code retains its original copyright notices and license terms, including Apache 2.0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Dataset and pretrained-weight licenses remain separate.

@@ -1,4 +1,4 @@
-#  CUDA_VISIBLE_DEVICES=0 python Medgemma.py --methed medpruner++
+#  CUDA_VISIBLE_DEVICES=0 python Medgemma.py --methed volucompose
 
 import argparse
 import re
@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
   "--methed",
   default=os.environ.get("METHED", "orignal"),
-  choices=["orignal", "medpruner++"],
+  choices=["orignal", "volucompose"],
   help="Compression methed. Can also be provided by env var METHED.",
 )
 args = parser.parse_args()
@@ -29,9 +29,9 @@ def _load_model_kwargs(methed):
     config_path = "../config/config.json"
     with open(config_path, "r", encoding="utf-8") as f:
         config_data = json.load(f)
-    if methed == "medpruner++":
+    if methed == "volucompose":
         print(f"run {methed}")
-        from medcompose.medpruner_pp import Gemma3ForConditionalGeneration
+        from medcompose.volucompose import Gemma3ForConditionalGeneration
         return config_data.get(methed, {}),Gemma3ForConditionalGeneration
     elif methed == "holitom":
         print(f"run {methed}")
