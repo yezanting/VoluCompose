@@ -174,12 +174,11 @@ The tests use synthetic features and stub generation to exercise compression and
 The manuscript metadata below comes from the author-provided draft. No published venue or DOI is asserted. [`CITATION.cff`](CITATION.cff) also provides a repository citation.
 
 ```bibtex
-@misc{ye2026volucompose,
-  title = {VoluCompose: Constructing Compact Volumetric Visual Representations for Medical Image Understanding},
-  author = {Ye, Zanting and Lin, Yunrui and Liu, Shengyuan and Hao, Jing and Hu, Chen and Zheng, Yefeng and Lu, Lijun},
-  year = {2026},
-  note = {Research manuscript; code release},
-  url = {https://github.com/yezanting/VoluCompose}
+@article{ye2026volucompose,
+  title={VoluCompose: Constructing Compact Volumetric Visual Representations for Medical Image Understanding},
+  author={Ye, Zanting and Lin, Yunrui and Liu, Shengyuan and Hao, Jing and Hu, Chen and Zheng, Yefeng and Lu, Lijun},
+  journal={arXiv preprint arXiv:2611.08649},
+  year={2026}
 }
 ```
 
